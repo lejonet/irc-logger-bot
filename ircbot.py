@@ -88,7 +88,7 @@ class Server(BaseServer):
         self.redis_connection = None
 
     def _split_nick(self, nick: str) -> Tuple[str, str]:
-        tmp = source.nick("!")
+        tmp = nick.split("!")
 
         return tmp[0], tmp[1]
 
