@@ -58,7 +58,7 @@ class Bot(BaseBot):
         self.logger.info("Add all servers")
         for server in self.irc_servers:
             name, nick, host, port, tls, password, config = server
-            self.logger.info(f"Server {name} with params({nick},{host},{port},{tls}")
+            self.logger.info(f"Server {name} with params({nick},{host},{port},{tls})")
             params = ConnectionParams(nickname = nick, host = host, port = port, tls = tls, password = password)
             await self.add_server(name, params, config)
 
