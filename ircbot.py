@@ -156,7 +156,7 @@ class Server(BaseServer):
                     self.logger.debug(f"Got a direct message: {line.params}")
                     msg = None
 
-                if msg.startswith('\x01ACTION'):
+                if msg is not None and msg.startswith('\x01ACTION'):
                     msg = msg.split("ACTION ")[1]
                     message["nick"] = f"* {nick}"
 
