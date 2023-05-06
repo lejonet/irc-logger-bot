@@ -35,6 +35,7 @@ logger.addHandler(fh)
 CHANNEL_LIST = 0
 REDIS_CONF   = 1
 DB_CONF      = 2
+PASSWD       = 3
 
 class Bot(BaseBot):
     irc_servers: List[Tuple]
@@ -71,9 +72,10 @@ class Bot(BaseBot):
 
 class Server(BaseServer):
     logger: logging.Logger
-    channel_list: List[str]
     redis_conf: str
     db_conf: str
+    _password: Optional[str]
+    channel_list: List[str]
     db_connection: Optional[AsyncConnection[any]]
     redis_connection: Optional[redis.client.Redis]
     def __init__(self, bot: BaseBot, name: str, config: Tuple[List[str], str, str]) -> None:
@@ -83,6 +85,10 @@ class Server(BaseServer):
         self.channel_list = config[CHANNEL_LIST]
         self.redis_conf   = config[REDIS_CONF]
         self.db_conf      = config[DB_CONF]
+        try:
+            self._password = config[PASSWD]
+        except:
+            self._password = None
         
         self.db_connection    = None
         self.redis_connection = None
@@ -136,6 +142,8 @@ class Server(BaseServer):
         match line.command:
             case "001":
                 self.logger.info(f"connected to {self.name} ({self.isupport.network})")
+                if self._password is not None:
+                    await self.send(build("PRIVMSG", ["NickServ", "IDENTIFY", self._password]))
                 for channel in self.channel_list:
                     await self.send(build("JOIN", [channel]))
             case "PRIVMSG":
