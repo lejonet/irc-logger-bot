@@ -243,7 +243,8 @@ def convert_config(config) -> None:
             tls_verify = TLS_VERIFYCHAIN
 
         channel_list = params["channel_list"].split(",")
-        srv_config = tuple([channel_list, config["redis_config"], config["db_config"]]) 
+        password = params["password"] if "password" in params else None
+        srv_config = tuple([channel_list, config["redis_config"], config["db_config"], password])
         srv_tuple = tuple([name, params["nick"], params["host"], port, tls_verify, srv_config])
         tmp.append(srv_tuple)
     config["servers"] = tmp
