@@ -57,9 +57,9 @@ class Bot(BaseBot):
     async def add_all_servers(self) -> None:
         self.logger.info("Add all servers")
         for server in self.irc_servers:
-            name, nick, host, port, tls, config = server
+            name, nick, host, port, tls, password, config = server
             self.logger.info(f"Server {name} with params({nick},{host},{port},{tls}")
-            params = ConnectionParams(nickname = nick, host = host, port = port, tls = tls, password = config["password"])
+            params = ConnectionParams(nickname = nick, host = host, port = port, tls = tls, password = password)
             await self.add_server(name, params, config)
 
         self.logger.info("Finished adding all servers")
@@ -244,8 +244,8 @@ def convert_config(config) -> None:
 
         channel_list = params["channel_list"].split(",")
         password = params["password"] if "password" in params else None
-        srv_config = tuple([channel_list, config["redis_config"], config["db_config"], password])
-        srv_tuple = tuple([name, params["nick"], params["host"], port, tls_verify, srv_config])
+        srv_config = tuple([channel_list, config["redis_config"], config["db_config"]])
+        srv_tuple = tuple([name, params["nick"], params["host"], port, tls_verify, password, srv_config])
         tmp.append(srv_tuple)
     config["servers"] = tmp
 
