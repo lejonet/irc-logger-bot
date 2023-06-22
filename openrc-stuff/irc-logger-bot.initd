@@ -1,0 +1,16 @@
+#!/sbin/openrc-run
+# Copyright 2023 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+depend() {
+	need net
+	use dns
+	after sssd
+}
+name="Spectrum irc-logger-bot"
+description="IRC bot that is designed to log what is said in certain IRC channels"
+command_user="irclog:irclog"
+command="${basedir}/bin/python"
+command_args="ircbot.py"
+command_background=true
+pidfile="/run/${RC_SVCNAME}.pid"
+start_stop_daemon_args="--chdir ${basedir}"
