@@ -149,7 +149,7 @@ class Server(BaseServer):
         if line.command in ["PRIVMSG", "JOIN", "PART", "KICK", "MODE", "TOPIC", "NICK"]:
             match line.command:
                 case "MODE":
-                    if "+b" in line.params[1] or "-b" in line.params[1]:
+                    if "b" in line.params[1]:
                         nick, fullname = self._split_nick(line.source)
                         message["nick"] = nick
                 case _:
@@ -211,7 +211,7 @@ class Server(BaseServer):
                 self.logger.debug(line.params)
                 channel = line.params[0]
                 mode = line.params[1]
-                if "+b" in mode or "-b" in mode:
+                if "b" in mode:
                     oper_nick = nick
                     message["opcode"] = "bans-unbans"
                     constructed_line = ""
