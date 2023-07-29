@@ -110,8 +110,8 @@ class Server(BaseServer):
                         tup = ('ban', nicks[index])
                     case '-':
                         tup = ('unban', nicks[index])
-                index += 1
                 modes.append(tup)
+            index += 1
 
         self.logger.debug(f"modes: {modes}")
         return modes
