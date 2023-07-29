@@ -113,7 +113,7 @@ class Server(BaseServer):
                 index += 1
                 modes.append(tup)
 
-        self.logger.debug("modes: {modes}")
+        self.logger.debug(f"modes: {modes}")
         return modes
 
     async def _persist_msg(self, message: Dict[str, str]) -> None:
