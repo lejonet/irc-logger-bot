@@ -95,9 +95,14 @@ class Server(BaseServer):
         
         return tmp[0], tmp[1]
 
-    def _parse_modeline(self, mode_line: str, nicks: list) -> List[Tuple[str, str, str]]:
+    def _parse_modeline(self, line_params: list) -> List[Tuple[str, str, str]]:
         modes = list()
         index = 0
+
+        target = line_params[0]
+        mode_line = line_params[1]
+        nr_nicks = len(line_params[2:])
+        nicks = line_params[2:] if nr_nicks != 0 else [target]
         mode_params = list(mode_line)
         for char in mode_params:
             if char in ['+', '-']:
@@ -125,9 +130,13 @@ class Server(BaseServer):
                             op = "deop"
                         case _:
                             op = "mode"
+
             tup = (op, nicks[index], f"{modifier}{char}")
+            self.logger.debug(f"tup: {tup}")
             modes.append(tup)
-            index += 1
+
+            if index != nr_nicks:
+                index += 1
 
         self.logger.debug(f"modes: {modes}")
         return modes
@@ -217,7 +226,7 @@ class Server(BaseServer):
             case "MODE":
                 self.logger.debug(line.params)
                 channel = line.params[0]
-                modes = self._parse_modeline(line.params[1], line.params[2:])
+                modes = self._parse_modeline(line.params)
                 oper_nick = nick
                 message["opcode"] = "mode"
                 constructed_line = ""
