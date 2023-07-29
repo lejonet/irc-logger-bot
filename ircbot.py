@@ -125,8 +125,8 @@ class Server(BaseServer):
                             op = "deop"
                         case _:
                             op = "mode"
-                tup = (op, nicks[index], f"{modifier}{char}")
-                modes.append(tup)
+            tup = (op, nicks[index], f"{modifier}{char}")
+            modes.append(tup)
             index += 1
 
         self.logger.debug(f"modes: {modes}")
