@@ -88,8 +88,11 @@ class Server(BaseServer):
         self.redis_connection = None
 
     def _split_nick(self, nick: str) -> Tuple[str, str]:
-        tmp = nick.split("!")
+        if "!" not in nick:
+            return nick, ""
 
+        tmp = nick.split("!")
+        
         return tmp[0], tmp[1]
 
     def _parse_modeline(self, mode_line: str, nicks: list) -> List[Tuple[str, str]]:
