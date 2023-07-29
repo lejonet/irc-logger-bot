@@ -207,7 +207,7 @@ class Server(BaseServer):
                 self.logger.debug(line.params)
                 channel = line.params[0]
                 mode = line.params[1]
-                if mode.startswith("+b") or mode.startswith("-b"):
+                if "+b" in mode or "-b" in mode:
                     oper_nick = nick
                     message["opcode"] = "bans-unbans"
                     constructed_line = ""
