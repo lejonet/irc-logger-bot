@@ -145,7 +145,7 @@ class Server(BaseServer):
         if line.command in ["PRIVMSG", "JOIN", "PART", "KICK", "MODE", "TOPIC", "NICK"]:
             match line.command:
                 case "MODE":
-                    if line.params[1].startswith("+b") or line.params[1].startswith("-b"):
+                    if "+b" in line.params[1] or "-b" in line.params[1]:
                         nick, fullname = self._split_nick(line.source)
                         message["nick"] = nick
                 case _:
