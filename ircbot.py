@@ -95,7 +95,7 @@ class Server(BaseServer):
         
         return tmp[0], tmp[1]
 
-    def _parse_modeline(self, mode_line: str, nicks: list) -> List[Tuple[str, str]]:
+    def _parse_modeline(self, mode_line: str, nicks: list) -> List[Tuple[str, str, str]]:
         modes = list()
         index = 0
         mode_params = list(mode_line)
@@ -104,12 +104,28 @@ class Server(BaseServer):
                 modifier = char
                 continue
 
-            if char == 'b':
-                match modifier:
-                    case '+':
-                        tup = ('ban', nicks[index])
-                    case '-':
-                        tup = ('unban', nicks[index])
+            match modifier:
+                case '+':
+                    match char:
+                        case 'b':
+                            op = "ban"
+                        case 'q':
+                            op = "quiet"
+                        case 'o':
+                            op = "op"
+                        case _:
+                            op = "mode"
+                case '-':
+                    match char:
+                        case 'b':
+                            op = "unban"
+                        case 'q':
+                            op = "unquiet"
+                        case 'o':
+                            op = "deop"
+                        case _:
+                            op = "mode"
+                tup = (op, nicks[index], f"{modifier}{char}")
                 modes.append(tup)
             index += 1
 
@@ -147,14 +163,8 @@ class Server(BaseServer):
             ("timestamp", int(time()))
         ])
         if line.command in ["PRIVMSG", "JOIN", "PART", "KICK", "MODE", "TOPIC", "NICK"]:
-            match line.command:
-                case "MODE":
-                    if "b" in line.params[1]:
-                        nick, fullname = self._split_nick(line.source)
-                        message["nick"] = nick
-                case _:
-                    nick, fullname = self._split_nick(line.source)
-                    message["nick"] = nick
+            nick, fullname = self._split_nick(line.source)
+            message["nick"] = nick
 
         constructed_line = None
         match line.command:
@@ -207,25 +217,38 @@ class Server(BaseServer):
             case "MODE":
                 self.logger.debug(line.params)
                 channel = line.params[0]
-                mode = line.params[1]
-                if "b" in mode:
-                    oper_nick = nick
-                    message["opcode"] = "bans-unbans"
-                    constructed_line = ""
-                    modes = self._parse_modeline(mode, line.params[2:])
+                modes = self._parse_modeline(line.params[1], line.params[2:])
+                oper_nick = nick
+                message["opcode"] = "mode"
+                constructed_line = ""
 
         if constructed_line is not None:
             if "opcode" in message:
                 match message["opcode"]:
-                    case "bans-unbans":
+                    case "mode":
                         for tup in modes:
-                            opcode, nick = tup
+                            opcode, nick, payload = tup
                             only_nick, _ = self._split_nick(nick)
-                            constructed_line = f"{only_nick} was {opcode}ned on {channel} by {oper_nick}"
+                            match opcode:
+                                case "ban"|"unban":
+                                    action = f"{opcode}ned {only_nick} in"
+                                case "quiet":
+                                    action = f"quieted {only_nick} in"
+                                case "unquiet":
+                                    action = f"allowed {only_nick} to speak again in"
+                                case "op":
+                                    action = "made {only_nick} operator in"
+                                case "deop":
+                                    action = "removed {only_nick} as operator in"
+                                case _:
+                                    action = f"{payload}"
+
+                            constructed_line = f"{oper_nick} {action} {channel}"
                             message["oper_nick"] = oper_nick
                             message["nick"] = nick
                             message["line"] = constructed_line
                             message["opcode"] = opcode
+                            message["payload"] = payload
                             self.logger.info(constructed_line)
                             await self._persist_msg(message)
                         return
