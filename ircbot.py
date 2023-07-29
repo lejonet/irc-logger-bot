@@ -92,6 +92,26 @@ class Server(BaseServer):
 
         return tmp[0], tmp[1]
 
+    def _parse_modeline(self, mode_line: str, nicks: list) -> List[Tuple[str, str]]:
+        modes = list()
+        index = 0
+        mode_params = list(mode_line)
+        for char in mode_params:
+            if char in ['+', '-']:
+                modifier = char
+                continue
+
+            if char == 'b':
+                match modifier:
+                    case '+':
+                        tup = ('ban', nicks[index])
+                    case '-':
+                        tup = ('unban', nicks[index])
+                index += 1
+                modes.append(tup)
+
+        return modes
+
     async def _persist_msg(self, message: Dict[str, str]) -> None:
         if self.db_connection is None:
             self.db_connection = await AsyncConnection.connect(self.db_conf)
@@ -189,23 +209,22 @@ class Server(BaseServer):
                 mode = line.params[1]
                 if mode.startswith("+b") or mode.startswith("-b"):
                     oper_nick = nick
-                    nicks = line.params[2:]
+                    message["opcode"] = "bans-unbans"
                     constructed_line = ""
-                if mode.startswith("+b"):
-                    message["opcode"] = "ban"
-                if mode.startswith("-b"):
-                    message["opcode"] = "unban"
+                    modes = self._parse_modeline(mode, line.params[2:])
 
         if constructed_line is not None:
             if "opcode" in message:
                 match message["opcode"]:
-                    case "ban"|"unban":
-                        for nick in nicks:
+                    case "bans-unbans":
+                        for tup in modes:
+                            opcode, nick = tup
                             only_nick, _ = self._split_nick(nick)
-                            constructed_line = f"{only_nick} was {message['opcode']}ned on {channel} by {oper_nick}"
+                            constructed_line = f"{only_nick} was {opcode}ned on {channel} by {oper_nick}"
                             message["oper_nick"] = oper_nick
                             message["nick"] = nick
                             message["line"] = constructed_line
+                            message["opcode"] = opcode
                             self.logger.info(constructed_line)
                             await self._persist_msg(message)
                         return
