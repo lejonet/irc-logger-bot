@@ -184,6 +184,7 @@ class Server(BaseServer):
             case "PRIVMSG":
                 if len(line.params) == 2: # If the length of params is 2, its a channel message
                     channel, msg = line.params
+                    message["opcode"] = "msg"
                 else:
                     self.logger.debug(f"Got a direct message: {line.params}")
                     msg = None
@@ -191,6 +192,7 @@ class Server(BaseServer):
                 if msg is not None and msg.startswith('\x01ACTION'):
                     msg = msg.split("ACTION ")[1].removesuffix('\x01')
                     message["nick"] = f"* {nick}"
+                    message["opcode"] = "action"
 
                 constructed_line = msg
             case "JOIN":
