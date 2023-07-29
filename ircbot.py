@@ -153,10 +153,7 @@ class Server(BaseServer):
                         nick, fullname = self._split_nick(line.source)
                         message["nick"] = nick
                 case _:
-                    if '!' in line.source: 
-                        nick, fullname = self._split_nick(line.source)
-                    else: # direct messages don't have "Fully qualified hostnames"
-                        nick = line.source
+                    nick, fullname = self._split_nick(line.source)
                     message["nick"] = nick
 
         constructed_line = None
