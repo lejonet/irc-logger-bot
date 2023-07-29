@@ -246,9 +246,9 @@ class Server(BaseServer):
                                 case "unquiet":
                                     action = f"allowed {only_nick} to speak again in"
                                 case "op":
-                                    action = "made {only_nick} operator in"
+                                    action = f"made {only_nick} operator in"
                                 case "deop":
-                                    action = "removed {only_nick} as operator in"
+                                    action = f"removed {only_nick} as operator in"
                                 case _:
                                     action = f"{payload}"
 
