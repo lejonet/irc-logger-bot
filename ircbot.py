@@ -191,7 +191,7 @@ class Server(BaseServer):
 
                 if msg is not None and msg.startswith('\x01ACTION'):
                     msg = msg.split("ACTION ")[1].removesuffix('\x01')
-                    message["nick"] = f"* {nick}"
+                    message["nick"] = nick
                     message["opcode"] = "action"
 
                 constructed_line = msg
