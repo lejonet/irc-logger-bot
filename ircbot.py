@@ -39,7 +39,7 @@ DB_CONF      = 2
 class Bot(BaseBot):
     irc_servers: List[Tuple]
     logger: logging.Logger
-    
+
     def __init__(self, config) -> None:
         super().__init__()
 
@@ -83,7 +83,7 @@ class Server(BaseServer):
         self.channel_list = config[CHANNEL_LIST]
         self.redis_conf   = config[REDIS_CONF]
         self.db_conf      = config[DB_CONF]
-        
+
         self.db_connection    = None
         self.redis_connection = None
 
@@ -124,10 +124,10 @@ class Server(BaseServer):
             async with self.redis_connection.pubsub() as pubsub:
                 await pubsub.subscribe(f"message.{self.name}")
 
-        keys = list(message) 
+        keys = list(message)
         fields = SQL(", ").join(map(Identifier, keys))
         values = SQL(', ').join(map(Placeholder, keys))
-        
+
         query = SQL("INSERT INTO irclog ({fields}) VALUES ({values}) RETURNING id").format(**{"fields": fields, "values": values})
         self.logger.debug(query.as_string(self.db_connection))
         async with self.db_connection.cursor() as cur:
@@ -180,7 +180,7 @@ class Server(BaseServer):
                 message["opcode"] = "join"
             case "PART":
                 try:
-                    channel, part_msg = line.params 
+                    channel, part_msg = line.params
                 except ValueError:
                     channel = line.params[0]
                     part_msg = ""
@@ -284,7 +284,7 @@ async def main() -> None:
         logger.info(f"Finished awaiting cancelled tasks, results: {results}")
         loop.stop()
         exit(0)
-    
+
     for sig in [signal.SIGINT, signal.SIGTERM]:
         loop.add_signal_handler(sig, lambda: asyncio.create_task(shutdown(loop)))
 
