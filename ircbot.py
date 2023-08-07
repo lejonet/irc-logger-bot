@@ -253,6 +253,8 @@ class Server(BaseServer):
                                     action = f"removed {only_nick} as operator in"
                                 case _:
                                     action = f"{payload}"
+                                    if nick != channel
+                                        action += f" {nick} in"
 
                             constructed_line = f"{oper_nick} {action} {channel}"
                             message["oper_nick"] = oper_nick
