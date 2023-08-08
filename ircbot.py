@@ -252,7 +252,7 @@ class Server(BaseServer):
                                 case "deop":
                                     action = f"removed {only_nick} as operator in"
                                 case _:
-                                    action = f"{payload}"
+                                    action = f"{mode_payload}"
                                     if nick != channel:
                                         action += f" {nick} in"
 
