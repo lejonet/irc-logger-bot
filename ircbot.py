@@ -256,12 +256,15 @@ class Server(BaseServer):
                                     if nick != channel:
                                         action += f" {nick} in"
 
-                            constructed_line = f"{oper_nick} {action} {channel} [{account_hostmask}]".removesuffix(" []") # This ensures that a empty account_hostmask doesn't pollute the db with a bunch of ' []' when the account_hostmask is empty
+                            constructed_line = f"{oper_nick} {action} {channel}"
+                            if opcode in ['ban', 'unban', 'quiet', 'unquiet']:
+                                constructed_line += " [{nick}]"
+
                             message["oper_nick"] = oper_nick
                             message["nick"] = only_nick
                             message["line"] = constructed_line
                             message["opcode"] = opcode
-                            message["payload"] = account_hostmask if opcode in ['ban', 'unban', 'quiet', 'unquiet'] else mode_payload
+                            message["payload"] = nick if opcode in ['ban', 'unban', 'quiet', 'unquiet'] else mode_payload
                             self.logger.info(constructed_line)
                             await self._persist_msg(message)
                         return
