@@ -92,7 +92,7 @@ class Server(BaseServer):
             return nick, ""
 
         tmp = nick.split("!")
-        
+
         return tmp[0], tmp[1]
 
     def _parse_modeline(self, line_params: list) -> List[Tuple[str, str, str]]:
@@ -238,8 +238,8 @@ class Server(BaseServer):
                 match message["opcode"]:
                     case "mode":
                         for tup in modes:
-                            opcode, nick, payload = tup
-                            only_nick, _ = self._split_nick(nick)
+                            opcode, nick, mode_payload = tup
+                            only_nick, account_hostmask = self._split_nick(nick)
                             match opcode:
                                 case "ban"|"unban":
                                     action = f"{opcode}ned {only_nick} in"
@@ -256,12 +256,12 @@ class Server(BaseServer):
                                     if nick != channel:
                                         action += f" {nick} in"
 
-                            constructed_line = f"{oper_nick} {action} {channel}"
+                            constructed_line = f"{oper_nick} {action} {channel} [{account_hostmask}]".removesuffix(" []") # This ensures that a empty account_hostmask doesn't pollute the db with a bunch of ' []' when the account_hostmask is empty
                             message["oper_nick"] = oper_nick
-                            message["nick"] = nick
+                            message["nick"] = only_nick
                             message["line"] = constructed_line
                             message["opcode"] = opcode
-                            message["payload"] = payload
+                            message["payload"] = account_hostmask if opcode in ['ban', 'unban', 'quiet', 'unquiet'] else mode_payload
                             self.logger.info(constructed_line)
                             await self._persist_msg(message)
                         return
