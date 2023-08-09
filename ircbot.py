@@ -247,7 +247,7 @@ class Server(BaseServer):
                 self.logger.debug(line)
                 message["opcode"] = "quit"
                 message["payload"] = line.params[0]
-                constructed_line = f"{nick} has quit [{message[\"payload\"]}]"
+                constructed_line = f"{nick} has quit [{message['payload']}]"
 
         if constructed_line is not None:
             if "opcode" in message:
