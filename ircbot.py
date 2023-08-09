@@ -281,7 +281,8 @@ class Server(BaseServer):
                     case "part" | "kick":
                         self.userlists[channel] -= set([nick])
                     case "join":
-                        self.userlists[channel] |= set([nick])
+                        if nick != self.name:
+                            self.userlists[channel] |= set([nick])
                     case "nick":
                         for channel, userlist in self.userlists.items():
                             if nick in userlist:
