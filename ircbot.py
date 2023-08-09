@@ -274,7 +274,7 @@ class Server(BaseServer):
 
                             constructed_line = f"{oper_nick} {action} {channel}"
                             if opcode in ['ban', 'unban', 'quiet', 'unquiet']:
-                                constructed_line += " [{nick}]"
+                                constructed_line += f" [{nick}]"
 
                             message["oper_nick"] = oper_nick
                             message["nick"] = only_nick
