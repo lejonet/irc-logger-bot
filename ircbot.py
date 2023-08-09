@@ -173,7 +173,7 @@ class Server(BaseServer):
             ("channel", line.params[0]),
             ("timestamp", int(time()))
         ])
-        if line.command in ["PRIVMSG", "JOIN", "PART", "KICK", "MODE", "TOPIC", "NICK"]:
+        if line.command in ["PRIVMSG", "JOIN", "PART", "KICK", "MODE", "TOPIC", "NICK", "QUIT"]:
             nick, fullname = self._split_nick(line.source)
             message["nick"] = nick
 
@@ -243,6 +243,11 @@ class Server(BaseServer):
                 oper_nick = nick
                 message["opcode"] = "mode"
                 constructed_line = ""
+            case "QUIT":
+                self.logger.debug(line)
+                message["opcode"] = "quit"
+                message["payload"] = line.params[0]
+                constructed_line = f"{nick} has quit [{message[\"payload\"]}]"
 
         if constructed_line is not None:
             if "opcode" in message:
@@ -292,7 +297,7 @@ class Server(BaseServer):
                             self.logger.debug(self.userlists[channel])
                             self.userlists[channel] |= set([nick])
                             self.logger.debug(self.userlists[channel])
-                    case "nick":
+                    case "nick" | "quit":
                         for channel, userlist in self.userlists.items():
                             if nick in userlist:
                                 message["channel"] = channel
@@ -300,8 +305,9 @@ class Server(BaseServer):
                                 self.logger.debug(self.userlists[channel])
                                 self.userlists[channel] -= set([message["nick"]])
                                 self.logger.debug(self.userlists[channel])
-                                self.userlists[channel] |= set([message["payload"]])
-                                self.logger.debug(self.userlists[channel])
+                                if message["opcode"] == "nick":
+                                    self.userlists[channel] |= set([message["payload"]])
+                                    self.logger.debug(self.userlists[channel])
 
                                 self.logger.info(constructed_line)
                                 await self._persist_msg(message)
