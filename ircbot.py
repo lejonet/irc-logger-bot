@@ -279,7 +279,7 @@ class Server(BaseServer):
                             self.logger.info(constructed_line)
                             await self._persist_msg(message)
                         return
-                    case "part" | "kick":
+                    case "leave" | "kick":
                         self.logger.debug(self.userlists[channel])
                         self.userlists[channel] -= set([nick])
                         self.logger.debug(self.userlists[channel])
