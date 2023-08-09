@@ -289,8 +289,8 @@ class Server(BaseServer):
                             if nick in userlist:
                                 message["channel"] = channel
                                 message["line"] = constructed_line
-                                self.userlists[channel] -= message["nick"]
-                                self.userlists[channel] |= message["payload"]
+                                self.userlists[channel] -= set([message["nick"]])
+                                self.userlists[channel] |= set([message["payload"]])
 
                                 self.logger.info(constructed_line)
                                 await self._persist_msg(message)
