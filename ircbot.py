@@ -86,6 +86,7 @@ class Server(BaseServer):
 
         self.db_connection    = None
         self.redis_connection = None
+        self.userlists        = dict()
 
     def _split_nick(self, nick: str) -> Tuple[str, str]:
         if "!" not in nick:
@@ -181,6 +182,15 @@ class Server(BaseServer):
                 self.logger.info(f"connected to {self.name} ({self.isupport.network})")
                 for channel in self.channel_list:
                     await self.send(build("JOIN", [channel]))
+            case "353":
+                self.logger.debug(f"Names: {line}")
+                def remove_modes(string):
+                    return string.removeprefix("@").removeprefix("+").removeprefix("%").removeprefix("~")
+
+                channel = line.param[2]
+                userlist = map(remove_modes, line.param[3:].split(" "))
+                self.userlists[channel] = set(userlist)
+                self.logger.debug(f"Userlists: {self.userlists}")
             case "PRIVMSG":
                 if len(line.params) == 2: # If the length of params is 2, its a channel message
                     channel, msg = line.params
