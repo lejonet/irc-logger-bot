@@ -48,7 +48,7 @@ class Bot(BaseBot):
         self.logger = logging.getLogger("ircbot.bot")
 
     async def add_server(self, name: str, params: ConnectionParams, config: Tuple[List[str], str, str], transport: ITCPTransport = TCPTransport()) -> BaseServer:
-        server = Server(self, name, config)
+        server = Server(self, name, config, params.nickname)
         self.servers[name] = server
         await server.connect(transport, params)
         await self._server_queue.put(server)
@@ -76,9 +76,10 @@ class Server(BaseServer):
     channel_list: List[str]
     db_connection: Optional[AsyncConnection[any]]
     redis_connection: Optional[redis.client.Redis]
-    def __init__(self, bot: BaseBot, name: str, config: Tuple[List[str], str, str]) -> None:
+    def __init__(self, bot: BaseBot, name: str, config: Tuple[List[str], str, str], nickname: str) -> None:
         super().__init__(bot, name)
 
+        self.bot_nick     = nickname
         self.logger       = logging.getLogger(f"ircbot.bot.{self.name}")
         self.channel_list = config[CHANNEL_LIST]
         self.redis_conf   = config[REDIS_CONF]
@@ -281,7 +282,7 @@ class Server(BaseServer):
                     case "part" | "kick":
                         self.userlists[channel] -= set([nick])
                     case "join":
-                        if nick != self.name:
+                        if nick != self.bot_nick:
                             self.userlists[channel] |= set([nick])
                     case "nick":
                         for channel, userlist in self.userlists.items():
