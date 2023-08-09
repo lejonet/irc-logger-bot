@@ -188,7 +188,7 @@ class Server(BaseServer):
                     return string.removeprefix("@").removeprefix("+").removeprefix("%").removeprefix("~")
 
                 channel = line.params[2]
-                userlist = map(remove_modes, line.params[3:].split(" "))
+                userlist = map(remove_modes, line.params[3].split(" "))
                 self.userlists[channel] = set(userlist)
                 self.logger.debug(f"Userlists: {self.userlists}")
             case "PRIVMSG":
