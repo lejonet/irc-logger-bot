@@ -280,17 +280,24 @@ class Server(BaseServer):
                             await self._persist_msg(message)
                         return
                     case "part" | "kick":
+                        self.logger.debug(self.userlists[channel])
                         self.userlists[channel] -= set([nick])
+                        self.logger.debug(self.userlists[channel])
                     case "join":
                         if nick != self.bot_nick:
+                            self.logger.debug(self.userlists[channel])
                             self.userlists[channel] |= set([nick])
+                            self.logger.debug(self.userlists[channel])
                     case "nick":
                         for channel, userlist in self.userlists.items():
                             if nick in userlist:
                                 message["channel"] = channel
                                 message["line"] = constructed_line
+                                self.logger.debug(self.userlists[channel])
                                 self.userlists[channel] -= set([message["nick"]])
+                                self.logger.debug(self.userlists[channel])
                                 self.userlists[channel] |= set([message["payload"]])
+                                self.logger.debug(self.userlists[channel])
 
                                 self.logger.info(constructed_line)
                                 await self._persist_msg(message)
