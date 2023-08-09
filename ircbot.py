@@ -278,6 +278,21 @@ class Server(BaseServer):
                             self.logger.info(constructed_line)
                             await self._persist_msg(message)
                         return
+                    case "part" | "kick":
+                        self.userlists[channel] -= set([nick])
+                    case "join":
+                        self.userlists[channel] |= set([nick])
+                    case "nick":
+                        for channel, userlist in self.userlists.items():
+                            if nick in userlist:
+                                message["channel"] = channel
+                                message["line"] = constructed_line
+                                self.userlists[channel] -= message["nick"]
+                                self.userlists[channel] |= message["payload"]
+
+                                self.logger.info(constructed_line)
+                                await self._persist_msg(message)
+                        return
 
             message["line"] = constructed_line
             self.logger.info(constructed_line)
